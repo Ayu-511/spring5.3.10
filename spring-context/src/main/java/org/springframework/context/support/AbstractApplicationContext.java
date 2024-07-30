@@ -581,12 +581,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				// Register bean processors that intercept bean creation.
 				// 将扫描到的BeanPostProcessors实例化并排序，并添加到BeanFactory的beanPostProcessors属性中去
+				// todo 因为上面的步骤完成了扫描，这个过程中程序员可能自己定义了一些BeanPostProcessor，在这一步就会把BeanFactory中所有的BeanPostProcessor找出来并实例化得到一个对象，并添加到BeanFactory中去（属性beanPostProcessors），最后再重新添加一个ApplicationListenerDetector对象（之前其实就添加了过，这里是为了把ApplicationListenerDetector移动到最后）
 				registerBeanPostProcessors(beanFactory);
 
 				beanPostProcess.end();
 
 				// Initialize message source for this context.
 				// 设置ApplicationContext的MessageSource，要么是用户设置的，要么是DelegatingMessageSource
+				// todo 如果BeanFactory中存在一个叫做"messageSource"的BeanDefinition，那么就会把这个Bean对象创建出来并赋值给ApplicationContext的messageSource属性，让ApplicationContext拥有国际化的功能
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
@@ -904,6 +906,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let post-processors apply to them!
+		// 从BeanFactory中获取ApplicationListener类型的beanName，然后添加到ApplicationContext中的事件广播器applicationEventMulticaster中去
 		String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
 		for (String listenerBeanName : listenerBeanNames) {
 			getApplicationEventMulticaster().addApplicationListenerBean(listenerBeanName);

@@ -265,19 +265,19 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @return set of beans registered if any for tooling registration purposes (never {@code null})
 	 */
 	protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
-		Assert.notEmpty(basePackages, "At least one base package must be specified");
-		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
-		for (String basePackage : basePackages) {
+		Assert.notEmpty(basePackages, "At least one base package must be specified"); // 确保至少指定了一个扫描的包路径
+		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>(); // 使用LinkedHashSet来存储BeanDefinitionHolder实例，以保持元素的插入顺序并避免重复。
+		for (String basePackage : basePackages) { // 遍历传进来的包路径，对每个包路径的组件进行扫描
 
-			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+			Set<BeanDefinition> candidates = findCandidateComponents(basePackage); // 查找包路径下标注了@Component、@Service、@Repository、@Controller等注解的类，生成对应的BeanDefinition
 
 			for (BeanDefinition candidate : candidates) {
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
-				candidate.setScope(scopeMetadata.getScopeName());
+				candidate.setScope(scopeMetadata.getScopeName()); // 这个类的作用域
 
-				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry); // 生成Bean的名称
 
-				if (candidate instanceof AbstractBeanDefinition) {
+				if (candidate instanceof AbstractBeanDefinition) { // 判断是否实现了AbstractBeanDefinition这个类
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				if (candidate instanceof AnnotatedBeanDefinition) {
@@ -286,11 +286,11 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				}
 
 				// 检查Spring容器中是否已经存在该beanName
-				if (checkCandidate(beanName, candidate)) {
+				if (checkCandidate(beanName, candidate)) { // 检查Spring容器中是否已经存在该bean名称的bean定义
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
 					definitionHolder =
 							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
-					beanDefinitions.add(definitionHolder);
+					beanDefinitions.add(definitionHolder); // 将BeanDefinitionHolder添加到结果集合中
 
 					// 注册
 					registerBeanDefinition(definitionHolder, this.registry);

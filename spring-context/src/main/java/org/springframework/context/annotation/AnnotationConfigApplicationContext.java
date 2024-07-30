@@ -65,10 +65,14 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
+		// 这行代码创建了一个StartupStep对象，用于追踪AnnotatedBeanDefinitionReader的创建过程。StartupStep是Spring Boot中用于记录应用程序启动过程中的各个步骤的工具，它可以帮助开发者更好地了解启动过程中的性能瓶颈。
 		StartupStep createAnnotatedBeanDefReader = this.getApplicationStartup().start("spring.context.annotated-bean-reader.create");
-		// 额外会创建StandardEnvironment
+		// todo 额外会创建StandardEnvironment 意味着在AnnotationConfigApplicationContext的某个地方（可能是在其父类或其他初始化方法中）会创建一个StandardEnvironment对象。Environment对象用于封装应用程序的环境信息，包括系统属性、环境变量、配置文件中的属性等
+		// 创建了一个AnnotatedBeanDefinitionReader对象，并将当前的AnnotationConfigApplicationContext实例作为参数传入。AnnotatedBeanDefinitionReader用于读取注解驱动的bean定义，它能够将类上的注解（如@Component, @Service, @Repository, @Controller等）转换为Spring容器中的bean定义
 		this.reader = new AnnotatedBeanDefinitionReader(this);
+		// 标记了AnnotatedBeanDefinitionReader创建步骤的结束，允许Spring Boot收集关于这个步骤的性能数据
 		createAnnotatedBeanDefReader.end();
+		// 创建了一个ClassPathBeanDefinitionScanner对象，并将当前的AnnotationConfigApplicationContext实例作为参数传入。ClassPathBeanDefinitionScanner用于扫描类路径（classpath）上的包，查找带有特定注解的类，并将这些类注册为Spring容器中的bean
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
@@ -87,6 +91,15 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * from the given component classes and automatically refreshing the context.
 	 * @param componentClasses one or more component classes &mdash; for example,
 	 * {@link Configuration @Configuration} classes
+	 */
+	/**
+	 * 可以接受多个Class对象。
+	 * 这些类通常包含@Component, @Service, @Repository, @Controller等注解，Spring会扫描这些类来创建bean定义。
+	 * @param componentClasses
+	 *
+	 * this();: 调用AnnotationConfigApplicationContext的无参构造方法。这个无参构造方法通常会初始化一些基本的组件，如DefaultListableBeanFactory（Spring的IoC容器）、AnnotatedBeanDefinitionReader（用于读取注解驱动的bean定义）和ClassPathBeanDefinitionScanner（用于扫描类路径上的bean定义）。
+	 * register(componentClasses);: 调用register方法，传入前面提到的componentClasses。这个方法会利用AnnotatedBeanDefinitionReader和ClassPathBeanDefinitionScanner来解析这些类上的注解，并将它们注册到DefaultListableBeanFactory中，形成bean定义。
+	 * refresh();: 调用refresh方法。这是Spring容器初始化过程中的一个重要步骤。它完成容器的初始化工作，包括加载bean定义、处理配置、创建bean等。
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
 		// 构造DefaultListableBeanFactory、AnnotatedBeanDefinitionReader、ClassPathBeanDefinitionScanner
